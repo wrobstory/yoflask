@@ -39,19 +39,15 @@
         Chart Type <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" role="menu">
-        <li ng-repeat="type in chartTypes"><a href="#">{{type}}</a></li>
+        <li ng-repeat="type in chartTypes"
+            ng-click="selectChart(type)">
+          <a href="#">{{type}}</a>
+        </li>
       </ul>
   </div>
 </div>
 
-<div class="jumbotron">
-  <h1>'Allo, 'Allo!</h1>
-  <p class="lead">
-    <img src="images/yeoman.png" alt="I'm Yeoman"><br>
-    Always a pleasure scaffolding your apps.
-  </p>
-  <p><a class="btn btn-lg btn-success" ng-href="#">Splendid!<span class="glyphicon glyphicon-ok"></span></a></p>
-</div>
+<div id="vincent-chart"></div>
 
 <div class="footer">
   <p>Created with

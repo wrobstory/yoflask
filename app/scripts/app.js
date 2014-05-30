@@ -1,7 +1,6 @@
 'use strict';
 
-angular
-  .module('yoflaskApp', [
+angular.module('yoflaskApp', [
     'ngCookies',
     'ngResource',
     'ngSanitize'

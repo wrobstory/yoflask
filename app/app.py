@@ -3,6 +3,7 @@ import os
 
 from flask import Flask, send_file, request
 import pandas as pd
+import vincent
 
 
 app = Flask(
@@ -29,7 +30,13 @@ class DataService(object):
         """Read data into DataFrames"""
         for name, params in self.asset_paths.items():
             df = pd.read_table(params['path'], sep=params['sep'])
-            self.dataframes[name] = df
+            if name == 'CO_WS_2011':
+                df['Date & Time Stamp'] = pd.to_datetime(
+                    df['Date & Time Stamp']
+                    )
+                df.index = df['Date & Time Stamp']
+                df = df[:5000]
+            self.dataframes[name] = df.dropna()
 
     def __repr__(self):
         return "DataService"
@@ -64,6 +71,28 @@ def dimensions():
     req = json.loads(request.data)
     dimensions = data_service.get_dimensions(req['name'])
     return json.dumps(dimensions)
+
+
+@app.route('/chart', methods=['POST'])
+def get_chart():
+    """Given a dataset, dims, and a chart type, return a chart spec"""
+    req = json.loads(request.data)
+
+    df = data_service.dataframes[req['dataset']]
+    subset = df[[req['xdim'], req['ydim']]]
+
+    chart_handler = getattr(vincent, req['chartType'])
+    # Handle timestamps with the index
+    if isinstance(df[req['xdim']][0], pd.Timestamp):
+        chart = chart_handler(subset[req['ydim']], width=600, height=430)
+    else:
+        chart = chart_handler(subset, iter_idx=req['xdim'], width=600,
+                              height=430)
+
+    chart.axis_titles(x=req['xdim'], y=req['ydim'])
+
+    spec = chart.to_json(pretty_print=False)
+    return spec
 
 
 if __name__ == "__main__":
